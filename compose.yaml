@@ -1,0 +1,34 @@
+services:
+
+  # Service - MariaDB database
+  mariadb:
+    container_name: nextcloud-mariadb
+    image: mariadb:latest
+    restart: always
+    command: --transaction-isolation=READ-COMMITTED --log-bin=binlog --binlog-format=ROW
+    environment:
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      start_period: 10s
+      interval: 10s
+      timeout: 5s
+      retries: 3
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - backend-nextcloud
+
+# Shared volumes between services & host machine
+volumes:
+  mariadb_data:
+
+# Shared networks between services
+# (default Docker driver: bridge)
+networks:
+  backend-nextcloud:
+    name: backend-nextcloud
+    driver: bridge
