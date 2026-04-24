@@ -22,6 +22,22 @@ services:
     networks:
       - backend-nextcloud
 
+  # Service - Adminer
+  adminer:
+    container_name: nextcloud-adminer
+    image: adminer:latest
+    restart: always
+    environment:
+      ADMINER_DEFAULT_SERVER: mariadb
+      ADMINER_DESIGN: ${ADMINER_DESIGN}
+    ports:
+      - "8081:80"
+    networks:
+      - backend-nextcloud
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
 # Shared volumes between services & host machine
 volumes:
   mariadb_data:
