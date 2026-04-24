@@ -38,9 +38,61 @@ services:
       mariadb:
         condition: service_healthy
 
+  # Service - Nextcloud
+  nextcloud:
+    container_name: nextcloud
+    image: nextcloud:latest
+    restart: always
+    environment:
+      NEXTCLOUD_ADMIN_USER: ${NEXTCLOUD_ADMIN_USER}
+      NEXTCLOUD_ADMIN_PASSWORD: ${NEXTCLOUD_ADMIN_PASSWORD}
+      NEXTCLOUD_TRUSTED_DOMAINS: ${NEXTCLOUD_TRUSTED_DOMAINS}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_HOST: mariadb
+    volumes:
+      - html:/var/www/html
+      - apps:/var/www/html/custom_apps
+      - config:/var/www/html/config
+      - data:/var/www/html/data
+      - theme:/var/www/html/themes/${NEXTCLOUD_THEME_DIR_NAME}
+    ports:
+      - "8443:80"
+    networks:
+      - backend-nextcloud
+    depends_on:
+      mariadb:
+        condition: service_healthy
+
 # Shared volumes between services & host machine
 volumes:
   mariadb_data:
+  html:
+  apps:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "${NEXTCLOUD_HOST_CUSTOM_APPS_DIR}"
+  config:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "${NEXTCLOUD_HOST_CONFIG_DIR}"
+  data:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "${NEXTCLOUD_HOST_DATA_DIR}"
+  theme:
+    driver: local
+    driver_opts:
+      type: "none"
+      o: "bind"
+      device: "${NEXTCLOUD_HOST_THEMES_DIR}/${NEXTCLOUD_THEME_DIR_NAME}"
 
 # Shared networks between services
 # (default Docker driver: bridge)
